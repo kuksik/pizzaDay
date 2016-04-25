@@ -1,0 +1,126 @@
+	<template name='menu'>
+ 	<div id='menu_container'>
+ 		<h2>Group menu</h2>
+
+ 		<div id='menu_list' class='list'>
+ 		
+ 			{{#if menuLenth}}
+
+	 			{{#each menu}}
+	 				<a class='list_item menu_list_item' id = '{{@index}}'>
+
+	 					<span class = 'dish_title'>{{title}}</span>
+	 					<span class = 'dish_price'>{{price}}$</span>
+	 					{{#if member}}
+		 					<span>
+		 						<a class='button edit_item'>&#9998;</a>
+		 						<a class='button del_item'>&#10007;</a>
+		 					</span>
+	 					{{/if}}
+	 				</a>
+	 			{{/each}}
+	 		{{else}}
+	 			<span>Currently  menu is empty</span>
+	 		{{/if}}
+ 			
+ 		</div>
+ 	</div>
+
+
+ 	{{#if member}}
+ 	<div id = 'add_menu_container'>
+ 		<a id = 'show_add_menu_form' class='  button_popup_window show'>Add dish</a>
+ 		<div class='window_popup'>
+		<form id='addMenuItem_form'>
+			<table>
+				<tr>
+					<td>
+						<input id="title" class='required' type="text" placeholder="title"/>
+
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input id="price"  class = 'required' type="number" placeholder="price"/>
+					</td>
+				</tr>
+			</table>
+
+			<span id = 'add_button'>
+				<a class='button' id='add_menu_item'>
+					ADD
+				</a>
+			</span>
+
+			<span id = 'edit_buttons'>
+				<a id='edit_menu_item' class='button'>SAVE</a>
+				<a id='cancel' class='button'>CANCEL</a>
+			</span>
+			<span id='title_edit' class = 'edit_span'></span>
+			<span id ='id_edit' class = 'edit_span'></span>
+		</form>
+	</div>
+	</div>
+ 	{{/if}}
+
+	{{>coupons}}
+
+
+</template>
+
+
+<template name='coupons'>
+ 	<div id='coupons_container'>
+ 		<h2>Free coupons</h2>
+		
+		{{#if couponsQuantity}}
+			<div id='coupons_list' class='list'>
+		 		{{#each coupons}}
+					<a class='list_item' >
+						<span>{{this}}</span>
+						
+						<span>
+							{{#if author}}
+								<a id={{@index}} class='del_coupons button'> &#10007; </a> 
+							{{/if}}
+						</span>
+					</a>	 			
+		 		{{/each}}
+		 	</div>
+		{{else}}
+			Your group hasn`t free coupons
+		{{/if}}
+
+
+		{{#if author}}
+			<div id = 'add_coupons'>
+				<a id ='show_add_coupons_form' class='button_popup_window show'>
+					Add coupons
+				</a>
+			 		
+			 	<div class='window_popup'>
+			 		<form id='addCoupon_form'>
+			 			
+			 			<select id='coupon' required>
+			 				{{#each menu}}
+			 					<option>{{title}}</option>
+			 				{{/each}}
+			 			</select>
+			 			
+			 			<a style="float: rigth;" class = 'button' id = 'add_coupon'>+</a>
+			 		</form>
+			 	</div>
+		 	</div>
+	 	{{/if}}
+	</div>
+</template>
+
+
+
+
+
+
+
+
+
+

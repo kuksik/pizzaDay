@@ -1,0 +1,38 @@
+<template name='menuBar'>
+	<div id="menu_bar_container">
+		<ul id = 'non_popup_list'>
+		
+			<li>
+				<a class='menu_bar_item' id='home' href='/home'>
+						Main
+				</a>
+			</li
+
+			><li>
+				<a class='menu_bar_item' id='groups' href='/groups'>
+						Groups
+				</a>
+			</li>
+			<!-- <li>
+				<a class='menu_bar_item'>{{>loginButtons}}</a>
+			</li> -->
+		</ul>
+
+
+
+		<ul id ='popup_list'>
+			
+			<li>
+				{{>cabinet}}
+			</li>
+			{{#if currentUser}}
+				
+				{{>notifications}}
+				
+			{{/if}}
+		</ul>
+
+
+			
+	</div>
+</template>

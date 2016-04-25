@@ -1,0 +1,44 @@
+<template name='notifications'>
+	<li>
+		{{#if notifications.quantity}}
+
+
+			
+			<a class='menu_bar_item popup_menu' id='notifications'> 
+				
+				
+				<div id='notifications_logo'>&#9993;<sup id='sup'>{{notifications.quantity}}</sup></div>
+				
+			</a>
+
+			
+			<div id='notifications_popup' class='popup'>
+					
+					{{#each notifications.list}}
+						
+								<a id='{{_id}}' class = 'notification_item'	>
+									{{creator}}
+								</a> <span></span>
+
+					{{/each}}
+				
+			</div>
+		{{/if}}
+
+
+
+		<div class = 'notification_window'>
+			<p>notification</p>
+				<p>
+					User <span id='user_name'></span> create new PizzaDay!
+					Please confirm your participation
+				</p>
+
+				<a class='button' id='confirm_participation' href="{{pathFor 'groupInfo' query='navigateItem=pizzaDay'}}">confirm</a>
+				<a class='button' id='cancel_participation'>cancel</a>
+
+		</div>
+
+	</li>
+
+</template>

@@ -1,0 +1,40 @@
+<template name='groupInfo'> 
+
+
+	<div id='group_navigate'>
+	
+		<div id='navigate_header'>
+			<span style = 'font-size:25px'>{{title}}</span>
+			<br>
+			<span style = 'font-size:13px'>creator {{founder.name}}</span>
+		</div>
+		
+		<div id = 'navigate_items'>	
+
+			<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=members'}}">Members</a>
+			
+			<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=menu'}}">Menu</a>
+			
+			
+			{{#if pizzaDay.created}}
+				
+					<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=pizzaDay'}}">Pizza day</a>
+				
+			{{else}}
+				
+					<a class = 'navigate_item' id = 'create_pizzaDay'>Create pizza  day event</a> 
+				
+			{{/if}}
+		</div>	
+		
+	</div>
+	
+
+	<div id='aboutGroup'>
+		{{> yield "aboutGroup"}}
+	</div>
+
+	
+
+
+</template>

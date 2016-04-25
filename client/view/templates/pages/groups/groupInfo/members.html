@@ -1,0 +1,73 @@
+<template name='members'>
+	<div id='members_container'>
+
+		<h2>Members</h2>
+			
+		
+	 	<div id='members_list' class='list'>
+	 		{{#each members}}
+					
+				<a class= 'list_item'>
+					<span> {{name}} </span>
+
+					<span>
+					{{#if author}}
+						{{#if founder}}
+						{{else}}
+							<a id='{{id}}' class='del_user button'> 
+								&#10007;
+							</a>
+						{{/if}}
+					{{else}}
+						{{#if founder}}
+							<span style='font-size:15px'>author</span>
+						{{/if}}
+					{{/if}}	 
+					</span>
+				</a>
+			
+				
+			{{/each}}
+
+		</div>
+		
+	</div>
+
+
+	{{#if author }}
+	<div id = 'users_container'>
+					
+		<a id = 'show_users_list' class='button_popup_window show'>Add members</a>
+				
+		<div class='window_popup'>
+			<div id='users_list' class='list'>	
+		    	{{#if users.quantity}}
+			    	
+			    	{{#each users.list}}
+			    		 
+		    			<a class='list_item'>
+			    			<span>
+			    				{{profile.name}}
+			    			</span>
+
+			    			<span>
+			    				<a  id='{{_id}}'  name = {{profile.name}} class='button add_user'> + </a>
+			    				
+			    			</span>
+			    		</a>
+		    		
+			    	{{/each}}
+				    
+				{{else}}
+			    	<span>Your added all users</span>
+			    {{/if}}
+	  		
+			</div>
+		</div>
+			
+	</div>
+	{{/if}}
+
+</template>
+
+

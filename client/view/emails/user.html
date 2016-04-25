@@ -1,0 +1,23 @@
+<template name="emailForUser">
+
+
+  <div style='background: #ffe6cc; color: #4d0f00; font-family: "Arial"; padding: 50px;'>
+  	<img style='width:100px; height:100px;' src="http://pngimg.com/upload/pizza_PNG7143.png">
+    <span style='font-size: 2em;'>Pizza Day</span>
+    <h2>Your order confirmed!</h2>
+    <h4>Your order list:</h4>
+    {{data}}
+    <table>
+  	  {{#each user.order}}
+  	    <tr>
+  	      <td style='padding: 8px;'>{{title}}</td>
+  	      <td style='padding: 8px;'>{{price}} $</td>
+  	  	  <td style='padding: 8px;'>{{quantity}}</td>
+  	    </tr>
+  	  {{/each}}
+    </table>
+    <h4>Your total: {{user.total}} $</h4>
+    <h4>your discount: {{discount}}</h4>
+    <h2>Enjoy your meal!</h2>
+  </div>
+</template>
