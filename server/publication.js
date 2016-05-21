@@ -1,13 +1,14 @@
 Meteor.publish('Groups', function() {
-  return Groups.find();
+  	return Groups.find();
 });
 
+
 Meteor.publish('Users', function() {
-  return Users.find({}, 
+  	return Users.find({}, 
   		{'fields': {'_id': 1, 'profile.name': 1} } );
 });
 
+
 Meteor.publish('Notifications', function() {
-	
-  	return Notifications.find( {'userId': this.userId, 'read': false} );
+	return Notifications.find( {'userId': this.userId, 'read': false} );
 });

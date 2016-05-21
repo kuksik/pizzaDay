@@ -1,15 +1,14 @@
-<template name="groups">
+	<template name="groups">
 
 	<div id='groups_container'>		
 	
 
 		{{>groupsList}}
 
-
-
 		{{#if currentUser}}
 			{{>newGroup}}
 		{{/if}}
+
 
 
 	</div>
@@ -19,54 +18,56 @@
 </template>
 
 <template name = "groupsList">
-	<div id='groups_list_container'>
+	
 		<h2>Groups list</h2>
 		<div id='groups_list' class='list'> 
-			{{#each group}}
-				<a id = {{_id}} class='list_item' href='/groups/{{title}}'>
-						
-						<div>					
-							<img src={{logo}} class='logo'>
-						</div>
-						
-						<div>
-							<span class = 'title'>
-								{{title}}
-							</span>
-
-							{{#if member}}
+			{{#if groups.length }}
+				{{#each groups.list}}
+					<a id = {{_id}} class='list_item link' href='/groups/{{title}}?navigateItem=members'>
 							
-								{{#if author}}
-								{{else}}
-									<span class='member'>(You is member)</span>
+							<div>					
+								<img src={{logo}} class='logo'>
+							</div>
+							&nbsp;
+							<div>
+								<span class='uppercase_text'>
+									{{title}}
+								</span>
+
+								{{#if member}}
+								
+									{{#if author}}
+									{{else}}
+										<span class='member'>(You is member)</span>
+									{{/if}}
+								
 								{{/if}}
-							
+
+								<br>
+								<span class = 'creator'>
+									created by <strong>{{founder.name}}</strong>
+								</span>
+
+							</div>
+						
+
+						<span>
+							{{#if author}}
+								<a class='button2 pencil link edit_group'>&#9998;</a>  
+								<a class='del_group button2 link'>&#10007;</a>	
 							{{/if}}
-
-							<br>
-							<span class = 'creator'>
-						 		{{#if author}}
-									creator: you
-								{{else}}
-									creator: {{founder.name}}
-								{{/if}}	
-							</span>
-
-						</div>
-					
-
-					<span>
-						{{#if author}}
-							<a class='button edit_group'>&#9998;</a>  
-							<a class='button del_group'>&#10007;</a>	
-						{{/if}}
-					</span>
-				</a>
+						</span>
+					</a>
 
 
-			{{/each}}
-		</div>
+				{{/each}}
+			{{else}}
+				<span class='empty_list'>Groups list is empty</span>
+			{{/if}}
+		
 	</div>
+
+	
 
 </template>
 
@@ -74,7 +75,7 @@
 
 <template name='newGroup'> 
 	<div id='addGroup_container'>
-		<a id='show_add_group_form' class=' button_popup_window show'> Add group </a>
+		<a id='show_add_group_form' class=' button_popup_window new_button show'> Add group </a>
 		<div class = 'window_popup'>
 			<form id='addGroup_form'>
 		    	
@@ -83,24 +84,27 @@
 		    			<td>
 		    				<input id="title" type="text" class='required' placeholder="title"/>
 				  		</td>
-				  	</tr>
-
-		        	<tr>
+				  	</tr><tr>
 		    			<td>
-		        			<input id="logo" type="url" accept="image/*" placeholder="logo url"/>
+		        			<input id="logo" accept="image/*" placeholder="logo url"/>
 		      			</td>
+				  	</tr>
+				  	<tr>
+				  		<td>
+				  			<span id = 'add_button'>
+								<a class='new_button submit' id = 'add_group'>Add</a>
+							</span>
+
+							<span id = 'edit_buttons'>
+								<a class = 'new_button' id = 'edit_group'>Save</a>
+								<a class = 'new_button' id='cancel'>Cancel</a>
+							</span>
+				  		</td>
 				  	</tr>
 
 				</table>
 				
-				<span id = 'add_button'>
-					<a class='button' id = 'add_group'>ADD</a>
-				</span>
-
-				<span id = 'edit_buttons'>
-					<a class = 'button' id = 'edit_group'>SAVE</a>
-					<a class = 'button' id='cancel'>CANCEL</a>
-				</span>
+				
 
 				<span id='edit_span' class = 'edit_span'></span>
 

@@ -1,9 +1,9 @@
 <template name='menuBar'>
-	<div id="menu_bar_container">
+	<div id="menu_bar_container" class='default'>
 		<ul id = 'non_popup_list'>
 		
 			<li>
-				<a class='menu_bar_item' id='home' href='/home'>
+				<a class='menu_bar_item' id='home' href='/'>
 						Main
 				</a>
 			</li
@@ -13,26 +13,154 @@
 						Groups
 				</a>
 			</li>
-			<!-- <li>
-				<a class='menu_bar_item'>{{>loginButtons}}</a>
-			</li> -->
+			
 		</ul>
-
-
 
 		<ul id ='popup_list'>
 			
 			<li>
+				
 				{{>cabinet}}
 			</li>
 			{{#if currentUser}}
 				
-				{{>notifications}}
+					{{>notifications}}
 				
 			{{/if}}
 		</ul>
+	</div>
+</template>
 
 
+
+
+
+<template name = 'cabinet'>
+	<a class='menu_bar_item popup_menu' id='cabinet'>
+		{{#if currentUser}}
+			{{currentUser.profile.name}}	
+		{{else}}
+			Sign in
+		{{/if}}
+	</a>
+
+	<div id='cabinet_popup' class='popup'> 
+
+		{{#if currentUser}}
+			<div id='cabinet_menu'>
+				<a id='logout' class='notification_item link'>Log out</a>
+			</div>
+		{{else}}
+			<p></p>
+			<a class = 'new_button' id='login_google'>Sign in with Google</a>
 			
+			<span style='font-size:15px'><strong>or</strong></span>
+
+			<form id='login_form'>
+				<table>
+					<tr>
+						<td>
+							<input id='login_email' class='required' placeholder='email'>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id='login_pas' type='password' class='required' placeholder='password'>
+							
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a class='new_button submit' id = 'signIn'>Sign in</a>
+						</td>
+					</tr>
+				</table>
+
+				<div id = 'cabinet_menu'>				
+					<a id='show_reg_form' class = 'link'>Create new user</a>
+				</div>
+			</form>
+
+			<form id='reg_form'>
+				<table>					
+					<tr>
+						<td>
+							<input id='reg_name' class = 'required' placeholder='username'>	
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id='reg_email' class = 'required'  placeholder='email'>	
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id='reg_pas' type='password'  class = 'required'  placeholder='password'>
+							
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id='confirm_pas' type='password' class = 'required'  placeholder = 'password again'>
+							
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<a class='new_button submit' id='create_user'>Create user</a>
+						</td>
+					</tr>
+				</table>
+
+				<div id = 'cabinet_menu'>
+				
+					<a id='show_login_form' class = 'link'>Sign in</a>
+				</div>
+			</form>
+		{{/if}}
+	</div>
+</template>
+
+
+
+
+<template name='notifications'>
+	<li>
+		{{#if notifications.quantity}}			
+			<a class='menu_bar_item popup_menu' id='notifications'> 
+				<div id='notifications_logo'>&#9993;<sup id='sup'>{{notifications.quantity}}</sup></div>
+			</a>
+			
+			<div id='notifications_popup' class='popup'>	
+				{{#each notifications.list}}
+					<a id='{{_id}}' class = 'notification_item link'>
+						New event in <span class='uppercase_text'>{{group}} </span>
+					</a> 
+				{{/each}}
+			</div>
+		{{/if}}
+	</li>
+</template>
+
+
+
+<template name = 'notificationWindow'>
+	<div id = "parent_popup">
+		<div class = 'notification_window window' id='not_wind' name='{{notification._id}}'>
+			
+			<h2>Notification</h2>
+			
+			<p>
+				User <span>{{notification.creator}}</span> create new PizzaDay event in group <span>{{notification.group}}</span>!
+				Event date <span>{{notification.date}}</span>.
+				Please confirm or cancel your participation
+			</p>
+
+			<span>
+				<a class='new_button' id='confirm_participation' href="{{pathFor 'groupInfo' query='navigateItem=pizzaDay'}}">confirm</a>
+
+				<a class='new_button' id='cancel_participation'>cancel</a>
+			</span>
+		</div>
 	</div>
 </template>

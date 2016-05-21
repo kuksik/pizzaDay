@@ -1,40 +1,260 @@
 <template name='groupInfo'> 
-
-
-	<div id='group_navigate'>
-	
+	<div id='group_navigate' class='default'>
 		<div id='navigate_header'>
-			<span style = 'font-size:25px'>{{title}}</span>
+			<span style = 'font-size:25px' class='uppercase_text'>{{title}}</span>
 			<br>
-			<span style = 'font-size:13px'>creator {{founder.name}}</span>
+			<span class = 'creator'>created by <strong>{{founder.name}}</strong></span>
 		</div>
 		
 		<div id = 'navigate_items'>	
-
 			<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=members'}}">Members</a>
-			
 			<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=menu'}}">Menu</a>
 			
-			
-			{{#if pizzaDay.created}}
-				
-					<a class = 'navigate_item' href="{{pathFor 'groupInfo' query='navigateItem=pizzaDay'}}">Pizza day</a>
-				
-			{{else}}
-				
-					<a class = 'navigate_item' id = 'create_pizzaDay'>Create pizza  day event</a> 
-				
+			{{#if member}}
+				{{#if pizzaDay.created}}
+						<a class = 'navigate_item' id = 'pizzaDay' href="{{pathFor 'groupInfo' query='navigateItem=pizzaDay'}}">Pizza day 
+							<span id='status' class='{{pizzaDay.status}}'>{{pizzaDay.status}}</span>
+						</a> 
+				{{else}}
+					<a class = 'navigate_item' id = 'create_pizzaDay' title = 'If you want create pizzaDay click here'>
+						Pizza day
+						<span id='status' class='not_created'>not created</span>
+					</a> 
+				 {{/if}} 
 			{{/if}}
 		</div>	
-		
 	</div>
 	
-
 	<div id='aboutGroup'>
 		{{> yield "aboutGroup"}}
 	</div>
+</template>
 
-	
 
 
+
+
+<template name='members'>
+	<div id='members_container'>
+		<h2>Members</h2>
+		
+	 	<div id='members_list' class='list'>
+	 		{{#each members}}
+				<a class= 'list_item'>
+					<span> {{name}} </span>
+					<span>
+						{{#if author}}
+							{{#if founder}}
+							{{else}}
+								<a id='{{id}}' class='del_user button2 link'> 
+									&#10007;
+								</a>
+							{{/if}}
+						{{else}}
+							{{#if founder}}
+								<span style='font-size:15px'>author</span>
+							{{/if}}
+						{{/if}}	 
+					</span>
+				</a>
+			{{/each}}
+		</div>
+	</div>
+
+	{{#if author }}
+	<div id = 'users_container'>				
+		<a id = 'show_users_list' class='button_popup_window new_button show'>Show user list</a>
+				
+		<div class='window_popup'>
+			<div id='users_list' class='list'>	
+		    	{{#if users.quantity}}
+			    	{{#each users.list}}
+		    			<a class='list_item'>
+			    			<span>
+			    				{{profile.name}}
+			    			</span>
+
+			    			<span>
+			    				<a  id='{{_id}}'  name = {{profile.name}} class='button2 pencil link add_user'> &#10004; </a>
+			    				
+			    			</span>
+			    		</a>
+			    	{{/each}}
+				{{else}}
+			    	<span class='empty_list'>Your added all users</span>
+			    {{/if}}
+			</div>
+		</div>
+	</div>
+	{{/if}}
+</template>
+
+
+
+
+
+<template name='menu'>
+ 	<div id='menu_container'>
+ 		<h2>Group menu</h2>
+
+ 		<div id='menu_list' class='list'>
+ 		
+ 			{{#if menuLenth}}
+
+	 			{{#each menu}}
+	 				<a class='list_item menu_list_item' id = '{{@index}}'>
+
+	 					<span class = 'dish_title'>{{title}}</span>
+	 					<span class = 'dish_price'>{{price}}$</span>
+	 					{{#if member}}
+		 					<span>
+		 						<a class='button2 pencil link edit_item'>&#9998;</a>
+		 						<a class='button2 link del_item'>&#10007;</a>
+		 					</span>
+	 					{{/if}}
+	 				</a>
+	 			{{/each}}
+	 		{{else}}
+	 			<span class='empty_list'>Currently  menu is empty</span>
+	 		{{/if}}
+ 		</div>
+ 	</div>
+
+ 	{{#if member}}
+ 		<div id = 'add_menu_container'>
+	 		<a id = 'show_add_menu_form' class='button_popup_window new_button show'>Add dish</a>
+	 		<div class='window_popup'>
+			<form id='addMenuItem_form'>
+				<table>
+					<tr>
+						<td>
+							<input id="title" class='required' type="text" placeholder="title"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id="price"  class = 'required' placeholder="price"/>
+						</td>
+					</tr>
+				</table>
+
+				<span id = 'add_button'>
+					<a class='new_button submit' id='add_menu_item'>
+						Add
+					</a>
+				</span>
+
+				<span id = 'edit_buttons'>
+					<a id='edit_menu_item' class='new_button'>Save</a>
+					<a id='cancel' class='new_button'>Cancel</a>
+				</span>
+				<span id='title_edit' class = 'edit_span'></span>
+				<span id ='id_edit' class = 'edit_span'></span>
+			</form>
+		</div>
+	</div>
+ 	{{/if}}
+
+	{{>coupons}}
+</template>
+
+
+<template name='coupons'>
+ 	<div id='coupons_container'>
+ 		<h2>Free coupons</h2>
+		
+		{{#if couponsQuantity}}
+			<div id='coupons_list' class='list'>
+		 		{{#each coupons}}
+					<a class='list_item' >
+						<span>{{this}}</span>
+						
+						<span>
+							{{#if author}}
+								<a id={{@index}} class='del_coupons button2 link'> &#10007; </a> 
+							{{/if}}
+						</span>
+					</a>
+		 		{{/each}}
+		 	</div>
+		{{else}}
+			<span class='empty_list'>This group hasn`t free coupons</span>
+		{{/if}}
+
+		{{#if author}}
+			{{#if this.menu}}
+				<div id = 'add_coupons'>
+					<br>
+					<a id ='show_add_coupons_form' class='button_popup_window new_button show'>
+						Add coupons
+					</a>
+				 		
+				 	<div class='window_popup'>
+				 		<div class='list'>
+				 			{{#each menu}}
+				 				<a class='list_item'>
+									<span>				 				
+				 						{{title}}
+				 					</span>
+				 					<span>
+				 						<a style="float: rigth;" class = 'button2 pencil link add_coupon' id='{{title}}'>&#10004;</a>
+				 					</span>
+				 				</a>
+				 			{{/each}}
+				 		</div>
+				 	</div>
+			 	</div>
+			{{/if}}	
+	 	{{/if}}
+	</div>
+</template>
+
+
+
+
+
+<template name = 'pizzaDay'>
+	<div id='pizzaDay_container'>		
+		<h2>Pizza Day</h2> 
+		{{#if eventCreator}}
+			<a class='new_button change_status' id={{pizzaDay.status}}> change status to "delivering" </a>
+		{{/if}}
+		
+		<p> Date: {{pizzaDay.date}}</p>
+		
+		{{#if confirmedOrOrdered}}
+			<a class = 'new_button' id = 'show_order_window'>Order</a>
+		{{/if}}
+
+	</div>
+</template>
+
+<template name = 'orderWindow'>
+	<div id='parent_popup'>
+		<div id = 'order_window' class='window'>
+			<h2>Group menu</h2>
+			<form id='menu_form'>
+				<table id='menu_list'>
+		 			<tr>
+		 				<td>title</td>
+		 				<td>price</td>
+		 				<td>count</td>
+		 			</tr>
+		 			{{#each menu}}
+		 				<tr >
+		 					<td class='title'>{{title}}</td>
+		 					<td class='price'>{{price}}$</td>
+		 					<td>
+		 						<input id = '{{@index}}' class='quantity_items' size="4"/>
+		 					</td>
+		 				</tr>
+					{{/each}}
+			 	</table>
+			</form>
+			<span>
+			 	<a class = 'new_button' id = 'confirm_order'>  confim your order </a>
+			 	<a class = 'new_button' id = 'cancel_order'> cancel </a>
+			</span>
+		</div>
+	</div>
 </template>

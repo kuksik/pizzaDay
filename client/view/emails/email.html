@@ -1,10 +1,7 @@
 <!-- Email template for Pizza Day creator -->
 <template name="email">
   <div >
-    <!-- style='background: #ffe6cc; color: #4d0f00; font-family: "Arial"; padding: 50px;'>
-  	 -->
     <h1>Pizza Day</h1>
-    
 
     <h2>Your order confirmed!</h2>
     
@@ -29,7 +26,6 @@
     <p>Your discount: {{user.discount}}$</p>
     <p>Payment with discount: {{user.payment}}$</p>
     
-
     {{#if creator}}
       <h4><strong>Group order list:</strong></h4>
     
@@ -47,16 +43,13 @@
           </tr>
         {{/each}}
       </table>
-    
 
       <p style='padding: 0px;'>Group total: {{pizzaDay.total}}$</p>
       <p style='padding: 0px;'>Group discount: {{pizzaDay.discount}}$</p>
       <p style='padding: 0px;'>Payment with discount: {{groupPayment}}$</p>
 
     {{/if}}
-    
-
+  
     <h2>Enjoy your meal!</h2>
-
   </div>
 </template>

@@ -1,16 +1,68 @@
 Meteor.startup( function() {
-  process.env.MAIL_URL = "smtp://postmaster%40sandboxfd54bd40b83c4671a83035e754c90045.mailgun.org:dcd63b6c4d94868c3c238659f5358398@smtp.mailgun.org:587";
+  process.env.MAIL_URL = 'smtp://kuks:b12ckh01e@smtp.sendgrid.net:587';
 });
 
 Meteor.methods({
-	
+
+  'removeNotifications': function(groupId) {
+    Notifications.remove({'groupId': groupId})
+  },
+  'removeUserNotification': function(userId) {
+    Notifications.remove({'userId': userId})
+  },
+  'removeGroup': function(groupId) {
+    Groups.remove({'_id': groupId});
+  },
+
+ 'addOrder': function(groupId, userId, order) {
+    
+    Groups.update(
+      {'_id': groupId, 'members.id':userId},
+      {$set: {'members.$.event.order': order} });
+  },
+
+'addEvent' : function(groupId, userId, participation) {
+    
+  if (!Groups.findOne({_id: groupId}).pizzaDay) {
+
+      Groups.update( 
+        {'_id': groupId},
+    
+        {$set: { 'pizzaDay': {
+                      created:true,
+                      date: (new Date()).toDateString(), 
+                      creator: Meteor.userId(),
+                      creatorName: Meteor.user().profile.name,     
+                      status: "ordering"
+                  }
+                }
+        } 
+    );
+  }          
+    Groups.update( 
+      {'_id': groupId, 'members.id':userId},
+      {
+        $set: { 
+          'members.$.event': {
+            'participation': participation,
+            'usedCoupons': []
+          }
+           } 
+      },  
+      function(err) {
+        if( err ) {
+        alert(err)
+        return
+      } }
+    );
+  },
 
 
-    'checkNewUserEmail': function(email) {
+  'checkNewUserEmail': function(email) {
 
-      return !!Accounts.findUserByEmail(email)
-      
-    },
+    return !!Accounts.findUserByEmail(email)
+    
+  },
 
 
  	'sendEmail': function(userId, html) {
@@ -20,7 +72,6 @@ Meteor.methods({
       {'fields': {'services.google.email':1, 'emails.address':1} }
     );
 
-    
     if (user.services.google) {  
       var email = user.services.google.email;
     }

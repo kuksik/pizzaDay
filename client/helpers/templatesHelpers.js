@@ -1,15 +1,16 @@
-Template.groupsList.helpers({
-  	group: function() {
 
-    	return Groups.find({}, {'fields': {'pizzaDay':0} });
+
+
+
+
+Template.groupsList.helpers({
+  	groups: function() {
+  		var groups = Groups.find({}, {'fields': {'logo':1, 'title':1, 'members':1, 'founder':1} });
+
+  		return { list: groups, length: groups.fetch().length}
   	},
 
- //  	author: function() {
 
-	// 	if( this.founder.id === Meteor.userId() ){	
-	// 		return true
-	// 	}
-	// }
 });
 
 Template.menu.helpers({
@@ -22,10 +23,41 @@ Template.menu.helpers({
 
 });
 
+
+Template.pizzaDay.helpers({
+
+	confirmedOrOrdered: function() {
+		
+
+		var members = Groups.findOne({'_id': this._id}).members;
+
+		var member = members.find(function(elem, i, err) {
+			if (elem.id === Meteor.userId()) {
+				return true;
+			}
+		} )
+
+		if ( !member.event ){
+			return false
+		} else if ( member.event.participation === 'canceled') {
+			return false
+		}
+		else if( member.event.order) {
+			return false
+		}
+
+		return true
+
+	}
+
+})
+
 Template.registerHelper('eventCreator', function() {
 
-		
-	if ( Meteor.userId() === this.pizzaDay.creator) {
+	var status = this.pizzaDay.status;
+	if ( Meteor.userId() === this.pizzaDay.creator && 
+				(status !== 'ordering') ) 
+	{
 		return true;
 	}
 }),
@@ -36,7 +68,7 @@ Template.email.helpers({
 
 	creator: function() {
 		
-		var userId = Template.currentData().userId,
+		var userId = Template.currentData().member.id,
 			pizzaDay = Template.currentData().pizzaDay;
 		
 		if (userId === pizzaDay.creator) {
@@ -46,15 +78,18 @@ Template.email.helpers({
 	},
 
 	groupOrder: function() {
-		var pizzaDay = Template.currentData().pizzaDay,
-			userId = Template.currentData().userId,
-			data = pizzaDay.orders,
-			res = [];
 		
-
-		for (var i in data){
 			
-			var order = data[i].order;
+		var data = Template.currentData();
+		var res = [];
+		var  members =  Groups.findOne({'_id':  data.groupId}).members;
+		
+		for (var i in members){
+			
+			if (members[i].event.participation === 'confirmed'){
+
+
+			var order = members[i].event.order;
 			
 			for (var key  in order ) {
 		
@@ -71,10 +106,10 @@ Template.email.helpers({
 				else {
 					res[index].quantity += order[key].quantity
 				}	
-
-			} 
+			}
+			 
+			}
 		}
-		
 		
 		
 		return res;
@@ -84,18 +119,30 @@ Template.email.helpers({
 		var pizzaDay = Template.currentData().pizzaDay;
 		return pizzaDay.total - pizzaDay.discount;
 	},
-
-	user: function() {
-		var userId = Template.currentData().userId,
-			pizzaDay = Template.currentData().pizzaDay;
-
-		discount = pizzaDay.discount/ pizzaDay.members.confirmed.length;
 		
-		data = pizzaDay.orders[userId];
-		data.discount = discount;
-		data.payment =pizzaDay.orders[userId].total - discount;
+	user: function() {			
+		var data = Template.currentData();
+		
+		var members =  Groups.findOne({_id: data.groupId}).members ;
+		
 
-		return data;
+		var count = 0;
+		for (var i =0; i<members.length; i++) {
+			if(members[i].event.participation === 'confirmed') {
+				count = count+1;
+			}
+		}
+		
+
+		var a = {
+			order: data.member.event.order,
+			discount: data.pizzaDay.discount/count,
+			total: data.member.event.total,
+			payment: data.member.event.total - data.pizzaDay.discount/count
+		}
+		
+
+		return a;
 	}
 })
 

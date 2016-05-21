@@ -5,82 +5,146 @@ Template.groups.events({
 })
 
 
+Template.groupsList.events({
+
+
+	'click #groups_list a': function(event) {
+		
+		if ( !Meteor.user() ) {
+			event.preventDefault();
+			alert('This content is available only to registered users')
+		}		
+	},
+
+	'click #groups_list': function(event) {
+		
+		var elem = event.target,
+			groupId = $(elem).closest('.list_item').attr('id');
+
+		if ( $(elem).hasClass('del_group') ) {	
+			event.preventDefault();
+			Meteor.call('removeGroup', groupId);
+			
+		}
+
+		else if ( $(elem).hasClass('edit_group') ) {
+			event.preventDefault();
+			var group = Groups.findOne({'_id': groupId}, {'fields': {'title': 1, 'logo': 1} } );
+			
+			var button = $('#show_add_group_form');
+			
+			if ( $(button).hasClass('show') ) {
+				$(button).trigger('click');
+			}
+			
+			if( $('#editGroup_form').length ) {
+				$('#cancel').trigger('click');
+			}
+
+			$('#add_button').hide();
+			$('#edit_buttons').show();
+			$(elem).next().hide();	
+
+			$('#addGroup_form').attr('id', 'editGroup_form');
+			
+			$('#add_group').removeClass('submit');
+			$('#edit_group').addClass('submit');
+
+			$('#title').val(group.title).addClass('valid');
+			$('#logo').val(group.logo).addClass('valid');
+
+			$('#edit_span').text(group._id)
+			$('#title').focus();
+			
+			
+		};
+
+	}
+
+})
+
+
 Template.newGroup.events({
 	
+	'input form': function(event) {
+		var elem = event.target,
+			validator = new Validator;
 
-	'click #add_group': function(event) {
-		event.preventDefault();
+		$(elem).removeClass('valid');
 
-		var title = $('#title').val(),
-			form = event.target;
-		
-		if ( !$(form).checkRequiredFields() ){
-			return
-		}	
-		else if ( Groups.findOne( {'title': title}) ){
-			$('#title').showError('Ououou... choose another name');
-			return
-		} 
-		else {
-			var logo = $('#logo').val() || 'http://www.rippleeffectlegacies.org/wp-content/uploads/2014/05/Group-Icon.png',
-				founderId = Meteor.userId(),	
-				userName = Meteor.user().profile.name;
-			
-			Groups.insert({
-				'title': title, 
-				'logo': logo,
-				'founder': { 
-					'id': founderId,
-					'name': userName
-					},
-				'members': [{
-					'id': founderId, 
-					'name': userName,
-					'founder': true
-					}],
-				'menu': [],
-          		'coupons': [],
-          		'pizzaDay':{}
-				}, 
-				function() {
-					$(form).trigger("reset").find('.error_box').remove();
-					Router.go('groupInfo', {title: title})
-				}
-			);	
+		if ( elem.value === '' ) {
+			$(elem).next('.error_box').remove();
+		}
+		else if (elem.id === 'title') {
+			validator.validateName(elem);
+		}
+		else if ( elem.id ==='logo'  ) {
+			validator.validateUrl(elem)
 		}
 	},
 
 
-	'click edit_group': function(event) {
+	'click #add_group': function(event) {
 		event.preventDefault();
 
-		var title = $('#title').val(),
+		var title = $('#title').val().toLowerCase(),
 			logo = $('#logo').val() || 'http://www.rippleeffectlegacies.org/wp-content/uploads/2014/05/Group-Icon.png',
-			id = $('#edit_span').text(),
+			form = (event.target).closest('form');
+		
+		if ( !$(form).checkRequiredFields(1) ){
+			return
+		}
+		else if ( Groups.findOne( {'title': title}) ){
+			
+			$('#title').showError('Ououou... choose another title');
+			return
+		} 
+		else {
+			
+				
+			var group = new Group();
+			
+			group.addGroup(title, logo);
+			
+			$(form).trigger("reset").find('.error_box').remove();
+			Router.go('groupInfo', {title: title}, {query: 'navigateItem=members'})
+		}
+	},
+
+
+	'click #edit_group': function(event) {
+		event.preventDefault();
+
+		var title = $('#title').val().toLowerCase(),
+			logo = $('#logo').val() || 'http://www.rippleeffectlegacies.org/wp-content/uploads/2014/05/Group-Icon.png',
+			groupId = $('#edit_span').text(),
 			checkGroup = Groups.findOne({'title': title}, {'fields': {'title':1}}),
-			form = event.target;		
+			form = (event.target).closest('form');	
 		
 		
 
-		if ( !$(form).checkRequiredFields() ) {
+		if ( !$(form).checkRequiredFields(1) ) {
 			return
 		} else if ( !!checkGroup  && checkGroup._id !== id){
-			$('#title').showError('Ououou... choose another name');
+			$('#title').showError('Ououou... choose another title');
 			return
 		} 
 		else{
 			$('#cancel').trigger('click')
 			$('.del_group').show();
-			Groups.update(
-				{'_id': id}, 
-				{$set: {'title': title, 'logo': logo} }
-			);
+
+			var group = new Group();
+			
+			group.editGroup(groupId, title, logo);
 		}
 	},
 
 	'click #cancel': function(event) {
 		$('#editGroup_form').attr('id', 'addGroup_form').trigger("reset")
-							                            .find('.error_box').remove();
+							.find('.error_box').remove();
+
+		$('#edit_group').removeClass('submit');
+		$('#add_group').addClass('submit');
 
 		$('#add_button').show();
 		$('#edit_buttons').hide();
@@ -91,46 +155,7 @@ Template.newGroup.events({
 
 
 
-Template.groupsList.events({
 
-
-	
-
-	'click #groups_list': function(event) {
-		
-		
-
-
-		var elem = event.target,
-			id = $(elem).closest('.list_item').attr('id');
-
-
-		if ( $(elem).hasClass('del_group') ) {	
-			event.preventDefault();
-			Groups.remove({'_id': id});
-		}
-
-		else if ( $(elem).hasClass('edit_group') ) {
-			event.preventDefault();
-			var group = Groups.findOne({'_id': id}, {'fields': {'title': 1, 'logo': 1} } );
-			
-			$('#show_add_group_form').trigger('click');
-
-			$('#add_button').hide();
-			$('#edit_buttons').show();
-
-			$('#addGroup_form').attr('id', 'editGroup_form');
-			
-			$('#title').val(group.title);
-			$('#logo').val(group.logo);
-			$('#edit_span').text(group._id)
-			$('#title').focus();
-			$(elem).siblings('.del_group').hide();	
-		};
-
-	}
-
-})
 
 
 
