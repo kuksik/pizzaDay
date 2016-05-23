@@ -190,13 +190,13 @@ Group = class Group {
 		if (this.group.pizzaDay) {
 
 			if( this.group.pizzaDay.status === 'ordering') {
-				var member = this.group.members .find(function (elem, i, members){
+				var member = this.group.members.find(function (elem, i, members) {
 					if (elem.id === memberId) {
 						return true;
 					}
 				});
 				
-				Meteor.call('removeUserNotification', member.id );
+				Meteor.call('removeUserNotification', member.id);
 
 				if (member.event) {
 					if (!member.event.usedCoupons) {
@@ -219,6 +219,13 @@ Group = class Group {
 			{'_id': this.groupId}, 
 			{ $pull: { 'members': {'id': memberId} } }
 		);
+
+		var group = new Group(this.groupId);
+		
+		if ( group.checkOrders() ) {
+			group.pizzaDayChangeStatus('ordering');
+		};
+
 	};
 
 

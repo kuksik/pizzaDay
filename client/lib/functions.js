@@ -1,5 +1,5 @@
-
 (function ( $ ) {
+
 	$.fn.popupWindow = function() {
 		event.preventDefault();
 		
@@ -16,7 +16,6 @@
 		}
 
 		else {
-
 			this.next('.window_popup').hide();	
 			this.addClass('show');
 
@@ -42,14 +41,9 @@
 			}
 		}
 		return this;
-	}
-} ( jQuery ));
+	};
 
-
-
-(function ( $ ) {
 	$.fn.showError = function(textError) {
-
 		var style = {
 			'font-size': '10px',
 			'color': '#F42E11',
@@ -58,25 +52,17 @@
 			'margin': '0 0 0 2px'
 		};
 
-		
 		this.next('.error_box').remove()
 		
 		var errorBox = $('<p></p>').addClass('error_box')
 						   .css(style).html(textError);
 		this.after(errorBox);
 		
-
 		return this;
-	}
-
-}( jQuery ));
+	};
 
 
-
-(function ( $ ) {
 	$.fn.checkRequiredFields = function(validFields) {
-
-
 		var inputs = this.find('input');
 			valid = true
 
@@ -92,5 +78,18 @@
 			}
 		}
 		return valid;
-	}
+	};
+
+	$.fn.clickMenuBarItem = function() {
+		$('.menu_bar_item').removeClass('selected_green');
+		this.addClass('selected_green');
+		return this;
+	};
 }( jQuery ));
+
+
+
+
+
+
+

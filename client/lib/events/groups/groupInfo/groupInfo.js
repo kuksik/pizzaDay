@@ -35,7 +35,7 @@ Template.groupInfo.events({
 		
 		Router.go('/groups/' + this.title + '?navigateItem=pizzaDay')
 		$('.navigate_item').css('color', 'black').removeClass('selected_green');
-		Meteor.setTimeout(function() { $('#navigate_items > a#pizzaDay').addClass('selected_green')}, 200)
+		Meteor.setTimeout(function() { $('#navigate_items > a#pizzaDay').addClass('selected_green')}, 150)
 	},
 
 
