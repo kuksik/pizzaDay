@@ -1,21 +1,20 @@
 Template.groupInfo.events({
 
-
 	'mouseenter .navigate_item': function(event) {
 		if( !$(event.currentTarget).hasClass('selected_green') ) {
 			$(event.currentTarget).css('color', '#00b300');
 		}
 	},
+
 	'mouseleave .navigate_item': function(event) {
 		if( !$(event.currentTarget).hasClass('selected_green') ) {
 			$(event.currentTarget).css('color', 'black');
 		}
 	},
 
-	'click #create_pizzaDay': function(event) {
-		
-
-		var elem = event.target;
+	'click #create_pizzaDay': function(event) {	
+		var elem = event.target,
+			group = new Group(this._id);
 
 		if ( !this.menu.length ) {
 			Router.go(document.location.pathname + '?navigateItem=menu');
@@ -23,22 +22,20 @@ Template.groupInfo.events({
 			return
 		}			
 
-		Meteor.call('addEvent', this._id, Meteor.userId(), 'confirmed')
-
+		group.addPizzaDay('confirmed');
+		
 		// send notifications
-		var members = this.members,
-			group = new Group;		
+		var members = this.members;		
 		
 		for (var i= 0; i < members.length; i++) {
 			if ( members[i].id !== Meteor.userId() ) {
-				group.addUserNotification(members[i].id, this._id)
+				group.addNotification(members[i].id, Meteor.user().profile.name)
 			}
 		}
 		
 		Router.go('/groups/' + this.title + '?navigateItem=pizzaDay')
 		$('.navigate_item').css('color', 'black').removeClass('selected_green');
 		Meteor.setTimeout(function() { $('#navigate_items > a#pizzaDay').addClass('selected_green')}, 200)
-
 	},
 
 
@@ -48,10 +45,8 @@ Template.groupInfo.events({
 })
 
 
-
-//********************************************* 
-
 Template.members.events({
+
 	'click #members_list': function(event) {
 		event.preventDefault();
 		var elem = event.target;
@@ -59,9 +54,9 @@ Template.members.events({
 		if ( $(elem).hasClass('del_user') ) {
 			
 			var memberId = $(elem).attr('id'),
-				group = new Group;
+				group = new Group(this._id);
 
-			group.deleteMember(memberId, this._id)
+			group.deleteMember(memberId)
 		}
 	},
 
@@ -71,20 +66,18 @@ Template.members.events({
 
 		if ( $(elem).hasClass('add_user') ) {
 			var userName = $(elem).attr('name'),
-				userId = $(elem).attr('id');
-				group = new Group;
+				userId = $(elem).attr('id'),
+				group = new Group(this._id);
 			
-			group.addMember(this._id, userId, userName);
+			group.addMember(userId, userName);
 			
 			if(this.pizzaDay && this.pizzaDay.status === 'ordering' && this.pizzaDay.date === (new Date()).toDateString() ) {
-				group.addUserNotification(userId, this._id);
+				group.addNotification(userId, this.pizzaDay.creatorName);
 			}	
 		}
-	},
+	}
 })
 
-
-//*********************************************
 
 Template.menu.events({
 
@@ -95,9 +88,9 @@ Template.menu.events({
 
 		if ( $(elem).hasClass('del_item') ) {
 			
-			var group = new Group();
+			var group = new Group(this._id,);
 
-			group.deleteMenuItem(this._id, menuItem.title);
+			group.deleteMenuItem(menuItem.title);
 		};
 
 		if ( $(elem).hasClass('edit_item') ){
@@ -131,7 +124,6 @@ Template.menu.events({
 		};
 	},
 
-
 	'input form': function(event) {
 		var elem = event.target,
 			validator = new Validator;
@@ -164,11 +156,10 @@ Template.menu.events({
 			return
 		}
 
-		var group = new Group;
-		group.addMenuItem(this._id, title, price)
+		var group = new Group(this._id);
+		group.addMenuItem(title, price)
 		
 		$(form).trigger("reset").find('.error_box').remove();
-		
 	},
 
 	'click #edit_menu_item': function(event) {
@@ -189,8 +180,8 @@ Template.menu.events({
 			return
 		}
 		
-		var group = new Group;
-		group.editMenuItem(this._id, menuId, title, price)
+		var group = new Group(this._id);
+		group.editMenuItem(menuId, title, price)
 
 		$('#cancel').trigger('click');
 	},
@@ -204,16 +195,9 @@ Template.menu.events({
 		$('#add_menu_item').addClass('submit')
 		$('#remove_menu_item').removeClass('submit')
 
-
 		$('.del_item').show();
 	},
 })
-
-
-
-
-
-
 
 
 Template.coupons.events({
@@ -222,24 +206,22 @@ Template.coupons.events({
 		event.preventDefault();
 
 		var coupon = event.target.id,
-			group = new Group;
+			group = new Group(Template.currentData()._id);
 
-		group.addCoupon(Template.currentData()._id, coupon)
+		group.addCoupon(coupon)
 
 	},
-
 
 	'click #coupons_list': function(event) {
 		event.preventDefault();
 		var elem = event.target,
-			group = new Group;
+			group = new Group(this._id);
 		
 		if ( $(elem).hasClass('del_coupons') ) {		
-			group.deleteCoupon(this._id, $(elem).attr('id'))
+			group.deleteCoupon($(elem).attr('id'))
 		};
 	}
 })
-
 
 
 Template.pizzaDay.events({
@@ -253,26 +235,21 @@ Template.pizzaDay.events({
 		$('#pizzaDay_container').append(html)
 	},
 
-	
-
 	'click .change_status': function(event) {
-		
 		var elem = event.target,
-			group = new Group;
+			group = new Group(this._id);
 
 		if ( elem.id === 'ordered') {
-			group.pizzaDayChangeStatus(this._id, 'ordered')
+			group.pizzaDayChangeStatus('ordered')
 			
 			$(elem).text('Change status to "delivered"')
 		} 
 		else if ( elem.id === 'delivering') {
-			group.pizzaDayChangeStatus(this._id, 'delivering')
-			Meteor.call('removeNotifications', Template.currentData()._id )
+			group.pizzaDayChangeStatus('delivering')
+			group.removeNotifications();
 			
 			Router.go(document.location.pathname + '?navigateItem=members');							
 		}
-	
-
 	},
 
 	'click #order_window': function(event) {
@@ -281,8 +258,8 @@ Template.pizzaDay.events({
 		if ( elem.id === 'cancel_order' ) {
 			$('#parent_popup').remove();
 		}
-
 	},
+
 	'input #menu_form': function(event) {
 		var elem = event.target,
 			validator = new Validator;
@@ -295,34 +272,29 @@ Template.pizzaDay.events({
 		else {
 			validator.validateNum(elem);
 		}
-
 	},
 
 	'click #confirm_order': function(event) {
-		
 		event.preventDefault();
 
 		var form = $('#menu_form')
+
 		if ( !$(form).checkRequiredFields() ) {
 			return
 		}
-
 		if ( !$(form).find('.valid').length ) {
 			return
 		}
 		
-		var group = new Group,
+		var group = new Group(this._id),
 			inputs = $('.quantity_items');
 	
-		group.confirmOrder(this._id, inputs);		
+		group.confirmOrder(inputs);		
 
 		$('#parent_popup').remove();
 
-
-		if ( group.checkOrders(this._id) ) {
-			group.pizzaDayChangeStatus(this._id, 'ordering');
+		if ( group.checkOrders() ) {
+			group.pizzaDayChangeStatus('ordering');
 		}; 
 	},
-})
-
-
+})		

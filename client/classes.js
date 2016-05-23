@@ -12,7 +12,14 @@ Validator = class Validator {
 		this.validateConPas;
 		this.validatePrice;
 		this.validateUrl;
+		this.validateSigninPas;
 	}
+
+	validateSigninPas(elem) {
+		if ( elem.value.length > 5 ) {
+			$(elem).addClass('valid');
+		}
+	};
 
 	validateNum(elem) {
 		if ( !this.rexpNum.test(elem.value) ) {
@@ -36,7 +43,6 @@ Validator = class Validator {
 	};
 
 	validateEmail(elem) {
-		
 		if ( elem.value.length > 50) {
 			$(elem).showError('only 50 characters')
 		}
@@ -86,7 +92,6 @@ Validator = class Validator {
 		}
 	};
 
-
 	validatePrice(elem) {
 		if( !this.rexpPrice.test(elem.value) ) {
 			$(elem).showError('price should be decimal value')
@@ -95,6 +100,7 @@ Validator = class Validator {
 			$(elem).addClass('valid').next('.error_box').remove();
 		}
 	};
+
 	validateUrl(elem) {
 		if ( !this.rexpUrl.test(elem.value) ){
 			$(elem).showError('type corect url')
@@ -106,63 +112,278 @@ Validator = class Validator {
 };
 
 
-
-
-
-
-
-
-
-
-
-
 Group = class Group {
-	constructor() {
-		// this.group: = Grous.findOne({'_id': groupId})
+	constructor(groupId) {
+		this.groupId = groupId;
+		this.group = Groups.findOne({ '_id': groupId });
 
 		this.addGroup;
 		this.editGroup;
+		this.removeGroup;
 
-		this.deleteMenuItem;
-		this.addMenuItem;
-		this.editMenuItem;
-		
 		this.addMember;
 		this.deleteMember;
-		this.addUserNotification;
-		this.pizzaDayChangeStatus;
-
+		
+		this.addMenuItem;
+		this.editMenuItem;
+		this.deleteMenuItem;
+		
 		this.addCoupon;
 		this.deleteCoupon;
+
+		this.addPizzaDay;
+		this.pizzaDayChangeStatus;
+
+		this.addNotification;
+		this.readNotification;
+		this.removeNotifications;
 
 		this.confirmOrder;
 		this.checkOrders;
 	}
 
-	checkOrders(groupId) {
 
-		var members = Groups.findOne({'_id': groupId}).members
+	addGroup(title, logo) {
+		var founderId = Meteor.userId(),	
+			founderName = Meteor.user().profile.name;
 		
-		for (var i=0; i<members.length; i++) {
-
-			if (members[i].event) {
-				
-				if (members[i].event.participation === 'confirmed' && !members[i].event.order) {
-					return false
-				}
+		Groups.insert({
+				'title': title, 
+				'logo': logo,
+				'founder': { 
+					'id': founderId,
+					'name': founderName
+					},
+				'members': [{
+					'id': founderId, 
+					'name': founderName,
+					'founder': true
+					}],
+				'menu': [],
+	      		'coupons': []
 			}
-			else {
-				return false
-			}
-		}
-		return true;
+		);	
 	};
 
-	confirmOrder(groupId, inputs) {
+	editGroup(title, logo) {
+		Groups.update(
+			{'_id': this.groupId}, 
+			{$set: {'title': title, 'logo': logo} }
+		);
+	};
 
-		var group = Groups.findOne({ '_id': groupId }),
-			members = group.members,
-			coupons = group.coupons;
+	removeGroup() {
+		Meteor.call('removeGroup', this.groupId);
+	};
+
+
+
+	addMember(userId, userName) {
+		
+		Groups.update( 
+			{ '_id': this.groupId }, 
+			{ $push: {'members': { 'id': userId, 'name': userName } } }
+		);
+	};
+
+	deleteMember(memberId) {
+		if (this.group.pizzaDay) {
+
+			if( this.group.pizzaDay.status === 'ordering') {
+				var member = this.group.members .find(function (elem, i, members){
+					if (elem.id === memberId) {
+						return true;
+					}
+				});
+				
+				Meteor.call('removeUserNotification', member.id );
+
+				if (member.event) {
+					if (!member.event.usedCoupons) {
+						var coup = [];
+					};
+
+					var coup = member.event.usedCoupons;
+
+					for (var i=0; i<coup.length; i++) {
+						Groups.update(
+							{'_id': this.groupId}, 
+							{ $push: { 'coupons': coup[i] }	} 
+						);
+					};
+				};	
+			};
+		};
+
+		Groups.update( 
+			{'_id': this.groupId}, 
+			{ $pull: { 'members': {'id': memberId} } }
+		);
+	};
+
+
+
+	addMenuItem(title, price) {
+		Groups.update( 
+			{ '_id': this.groupId }, 
+			{ $push: { 'menu': { 'title': title, 'price': price } } }  
+		);
+	};
+
+	deleteMenuItem(menuItem) {
+		Groups.update( 
+			{'_id': this.groupId}, 
+			{ $pull: {'menu': { 'title': menuItem } } } 
+		);
+	};
+
+	editMenuItem(menuId, title, price) {
+		var data = {}
+			data['menu.'+ menuId ] =  1;
+		
+		Groups.update(
+			{'_id': this.groupId},
+			{ $unset: data }
+		);
+		
+		data = {}
+		data['menu.'+ menuId ] =  {'title': title, 'price': price};
+			
+		Groups.update(
+			{ '_id': this.groupId }, 
+			{$set: data },
+		);
+	};
+
+
+
+	addCoupon(coupon) {
+		Groups.update(
+			{ '_id': this.groupId },
+			{ $push: { 'coupons': coupon } }
+		);
+	};
+
+	deleteCoupon(groupId, couponId) {
+		var data = {}
+			data['coupons.'+ couponId ] =  1;
+			
+		Groups.update(
+			{'_id': this.groupId},
+			{ $unset: data }
+		);
+
+		Groups.update(
+			{ '_id': this.groupId }, 
+			{ $pull: { coupons: null } } 
+		);
+	};
+
+
+
+
+	addPizzaDay(participation) {
+		Meteor.call('addEvent', this.groupId, Meteor.userId(), participation)
+	};
+
+	pizzaDayChangeStatus(status){
+
+		if ( status === 'ordering' ) {
+			var members = this.group.members;
+
+        	var total = 0,
+       			discount = 0;
+
+	        for (var i=0; i< members.length; i++) {
+	        	var event = members[i].event;
+	        	if ( event.participation === 'confirmed' ) {
+	        		total = total + event.total;
+	        		discount = discount + event.discount;
+	        	}
+	        }
+	        
+	        Groups.update(
+	    		{'_id': this.groupId}, 
+	    		{$set: {
+	    			'pizzaDay.total': total, 
+	    			'pizzaDay.status': 'ordered',
+	    			'pizzaDay.discount':discount
+	    		}}
+	        );
+
+        	for (i=0; i<members.length; i++) {
+      		
+		        if (members[i].event.participation === 'confirmed') {
+		        	
+			   		var html=Blaze.toHTMLWithData(Template.email, {
+			   			groupId: this.groupId,
+			   			member: members[i],
+			   			pizzaDay: Groups.findOne({'_id': this.groupId}).pizzaDay
+			   		});     	
+			   		 	
+			     	Meteor.call('sendEmail', members[i].id, html)
+			    }
+	   		}
+		}
+
+		else if ( status === 'ordered') {
+			Groups.update( 
+				{'_id': this.groupId}, 
+				{ $set: { 'pizzaDay.status': 'delivering' } }
+			);
+		} 
+
+		else if ( status === 'delivering') {
+			Groups.find( {'_id': this.groupId} ).forEach( function(doc) {
+				
+				doc.members.forEach( function(member) {
+					delete member.event;
+				});
+
+				delete doc.pizzaDay;
+				
+				Groups.update({'_id': doc._id}, 
+					{
+						$set: {'members': doc.members}, 
+						$unset: {'pizzaDay': 1}
+					}
+				);
+			});
+		};
+	};
+
+
+
+
+	addNotification(userId, creatorName) {
+		Notifications.insert(
+			{
+				'userId': userId,
+				'creator': creatorName,
+				'groupId': this.groupId,
+				'group': this.group.title,
+				'date': (new Date()).toDateString(),
+				'read': false 
+			}
+		)
+	};
+
+	readNotifiction(notificationId) {
+		Notifications.update(
+			{'_id': notificationId}, 
+			{ $set: { 'read': true } }
+		);
+	};
+
+	removeNotifications() {
+		Meteor.call('removeNotifications', this.groupId)
+	};
+
+
+
+	confirmOrder(inputs) {
+		var members = this.group.members,
+			coupons = this.group.coupons;
 			
 		var discount = 0,
 			total = 0,
@@ -174,9 +395,8 @@ Group = class Group {
 		for (var i=0; i<inputs.length; i++) {
 
 			if ( inputs[i].value ) {
-
 				var quantity = +inputs[i].value,
-					menu = group.menu[ inputs[i].id ];
+					menu = this.group.menu[ inputs[i].id ];
 
 				order.push(	
 					{ 
@@ -197,7 +417,6 @@ Group = class Group {
 			};
 		};
 		
-
 		for (var i=0; i<members.length; i++ ) {
 			
 			if( members[i].id === Meteor.userId() ) {
@@ -214,269 +433,34 @@ Group = class Group {
 				data['members.' + i] = members[i];
 
 				Groups.update(
-					{ '_id': groupId }, 
+					{ '_id': this.groupId }, 
 					{ $set: data }
 				);	
-			
 				break	
 			}
 		};
 		
 		Groups.update(
-			{ '_id': groupId },
-			{ $set:{'coupons': coupons} }
+			{ '_id': this.groupId },
+			{ $set:{ 'coupons': coupons } }
 		);
-	};
+	};	
 
-
-	deleteCoupon(groupId, couponId) {
-		var data = {}
-			data['coupons.'+ couponId ] =  1;
+	checkOrders() {
+		var members = this.group.members;
+		
+		for (var i=0; i<members.length; i++) {
 			
-		Groups.update(
-			{'_id': groupId},
-			{ $unset: data }
-		);
-		Groups.update(
-			{'_id': groupId}, 
-			{$pull: {coupons: null} } 
-		);
-	}
+			if (members[i].event) {
 
-	addCoupon(groupId, coupon) {
-		Groups.update(
-			{'_id': groupId},
-			{ $push: { 'coupons': coupon } }
-		);
-	}
-
-	pizzaDayChangeStatus(groupId, status){
-
-		if ( status === 'ordering' ) {
-
-			var members = Groups.findOne( {'_id': this._id} ).members;
-
-        	var total = 0,
-       			discount = 0;
-
-	        for (var i=0; i< members.length; i++) {
-	        	var event = members[i].event;
-	        	if(event.participation === 'confirmed') {
-	        		total = total + event.total;
-	        		discount = discount + event.discount;
-	        	}
-	        }
-	        
-	        Groups.update(
-	    		{'_id': groupId}, 
-	    		{$set: {
-	    			'pizzaDay.total': total, 
-	    			'pizzaDay.status': 'ordered',
-	    			'pizzaDay.discount':discount
-	    		}}
-	        );
-
-
-        	for (i=0; i<members.length; i++) {
-      		
-		        if (members[i].event.participation === 'confirmed') {
-		        	
-			   		var html=Blaze.toHTMLWithData(Template.email, {
-			   			groupId: groupId,
-			   			member: members[i],
-			   			pizzaDay: Groups.findOne({'_id': this._id}).pizzaDay
-			   		});     	
-			   		 	
-			     	Meteor.call('sendEmail', members[i].id, html)
-			    }
-	   		}
-		}
-
-		else if ( status === 'ordered') {
-			
-			Groups.update( 
-				{'_id': groupId}, 
-				{$set: { 'pizzaDay.status': 'delivering'}
-			});
-		} 
-
-		else if ( status === 'delivering') {
-
-			Groups.find( {'_id': groupId} ).forEach( function(doc) {
-				
-				doc.members.forEach( function(member) {
-					delete member.event;
-				});
-
-				delete doc.pizzaDay;
-				
-				Groups.update({'_id': doc._id}, 
-					{
-						$set: {'members': doc.members}, 
-						$unset: {'pizzaDay': 1}
-					});
-			})
-		}
-	};
-
-	deleteMember(memberId, groupId) {
-
-		var group = Groups.findOne(
-			{'_id': groupId},
-			{ 'fields': {'members': 1, 'pizzaDay': 1} }
-		)
-
-		if (group.pizzaDay) {
-			
-
-			if( group.pizzaDay.status === 'ordering') {
-				var members = group.members 
-
-				var member = members.find(function (elem, i, members){
-					if (elem.id === memberId) {
-						return true;
-					}
-
-				})
-				
-				Meteor.call('removeUserNotification', member.id )
-
-				if (member.event) {
-					if (!member.event.usedCoupons) {
-
-						var coup = [];
-					}
-					var coup = member.event.usedCoupons;
-
-					for (var i=0; i<coup.length; i++) {
-						
-						Groups.update(
-							{'_id': groupId}, 
-							{
-								$push: {'coupons': coup[i]},
-							} );
-					}
-
+				if (members[i].event.participation === 'confirmed' && !members[i].event.order) {
+					return false
 				}
-				
 			}
-			
-		}
-
-		Groups.update( 
-			{'_id': groupId}, 
-			{ $pull: { 'members': {'id': memberId} } }
-		);
+			else {
+				return false
+			};
+		};
+		return true;
 	};
-
-	addUserNotification(userId, groupId) {
-
-		var group = Groups.findOne(
-				{'_id': groupId},
-				{ 'fields': {'title': 1, 'pizzaDay': 1} }
-			)
-
-		Notifications.insert(
-			{
-				'userId': userId,
-				'creator': group.pizzaDay.creatorName,
-				'groupId': groupId,
-				'group': group.title,
-				'date': (new Date()).toDateString(),
-				'read': false 
-			}
-		)
-
-	};
-
-	addMember(groupId, userId, userName) {
-		Groups.update( 
-			{'_id': groupId}, 
-			{$push: {'members': {'id': userId, 'name': userName } } }
-		);
-
-	};
-
-	editMenuItem(groupId, menuId, title, price) {
-
-		var data = {}
-			data['menu.'+ menuId ] =  1;
-		
-		Groups.update(
-			{'_id': groupId},
-			{ $unset: data }
-		);
-		
-		data = {}
-		data['menu.'+ menuId ] =  {'title': title, 'price': price};
-			
-		Groups.update(
-			{'_id': groupId}, 
-			{$set: data },
-			function(err) {
-				if ( err ) {
-					alert(err);
-					return
-				}
-			} 
-		);
-	};
-
-	addMenuItem(groupId, title, price) {
-		Groups.update( 
-			{'_id': groupId}, 
-			{$push: {'menu': {'title': title, 'price': price} } },
-			function(err) {
-				if( err ) {
-					alert(err.reason)
-					return
-				}
-				
-			} 
-		);
-
-
-	}
-
-
-
-	deleteMenuItem(groupId, menuItem) {
-		Groups.update( 
-			{'_id': groupId}, 
-			{ $pull: {'menu': { 'title': menuItem } } } 
-		);
-	};
-	editGroup(groupId, title, logo) {
-		Groups.update(
-			{'_id': groupId}, 
-			{$set: {'title': title, 'logo': logo} }
-		);
-	};
-
-	addGroup(title, logo) {
-		
-		var founderId = Meteor.userId(),	
-			founderName = Meteor.user().profile.name;
-		
-		
-		Groups.insert({
-				'title': title, 
-				'logo': logo,
-				'founder': { 
-					'id': founderId,
-					'name': founderName
-					},
-				'members': [{
-					'id': founderId, 
-					'name': founderName,
-					'founder': true
-					}],
-				'menu': [],
-          		'coupons': []
-				}, 
-				function() {
-					
-				}
-			);	
-	}
-}
+};

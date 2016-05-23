@@ -5,13 +5,14 @@ Template.menuBar.events({
 			$(event.currentTarget).css('color', '#00b300')
 		}
 	},
+
 	'mouseleave .menu_bar_item': function(event) {
 		if( !$(event.currentTarget).hasClass('open_popup') ) {
 			$(event.currentTarget).css('color', 'white')
 		}	
 	},
-	'click .menu_bar_item': function(event) {
-		
+
+	'click .menu_bar_item': function(event) {	
 		var elem = event.currentTarget;
 
 		if ( !$(elem).hasClass('popup_menu') ) {
@@ -21,23 +22,22 @@ Template.menuBar.events({
 		else {
 			$('.popup').hide();
 
-			if( $(elem).css('color') ===  '#00b300')
-			{
+			if( $(elem).css('color') ===  '#00b300') {
 				$(elem).css('color', 'white');					
 				return
 			}	
 
 			$('.popup_menu').css('color', 'white').removeClass('open_popup');
 				
-			$(elem).css('color', '#00b300').addClass('open_popup');
-			$(elem).next().fadeIn(400);
+			$(elem).css('color', '#00b300').addClass('open_popup')
+										           .next().fadeIn(400);
 		}	
 	},
 });
 
 
-
 Template.cabinet.events({
+
 	'click #cabinet_menu': function(event) {
 		event.preventDefault();
 
@@ -48,11 +48,11 @@ Template.cabinet.events({
 			Meteor.logout();
 			$('.popup_menu').css('color', 'white');
 			$('.popup').hide();
-			Router.go('/')
+			Router.go('/');
 		} 
 		else if ( id === 'show_reg_form' ) {
 			$('#login_form').trigger('reset').hide()
-							.find('.error_box').remove();;
+							.find('.error_box').remove();
 			$('#reg_form').show().find('input')[0].focus();
 
 		} 
@@ -64,7 +64,6 @@ Template.cabinet.events({
 	},
 
 	'input #reg_form': function(event) {
-		
 		var elem = event.target,
 			validator = new Validator();
 			
@@ -87,9 +86,24 @@ Template.cabinet.events({
 			validator.validateConPas(elem);
 		}
 	},
+	'input #login_form':function(event) {
+		var elem = event.target,
+			validator = new Validator();
+
+		$(elem).removeClass('valid');
+
+		if ( elem.value === '' ) {
+			$(elem).next('.error_box').remove()
+		} 
+		else if ( elem.id === 'login_email' ) {
+			validator.validateEmail(elem)
+		}
+		else if ( elem.id === 'login_pas') {
+			validator.validateSigninPas(elem)
+		}	
+	},
 
 	'click #login_google': function(event) {
-		
 		Meteor.loginWithGoogle(function(err) {
 			if (err) {
 				console.log(err); 
@@ -98,7 +112,6 @@ Template.cabinet.events({
 			$('.popup_menu').css('color', 'white');
 			$('.popup').hide();
 		});
-		
 	},
 
 	'click #signIn': function(event) {
@@ -106,14 +119,11 @@ Template.cabinet.events({
 		
 		var form = $(event.target).closest('form');
 
-
 		if ( !$(form).checkRequiredFields(2) ) {
     		return
     	} 
     	else {
-
 			Meteor.loginWithPassword($('#login_email').val(), $('#login_pas').val(), function(err) {
-				
 				if (err) {
 					if ( err.reason === 'User not found') {
 						$('#login_email').showError(err.reason).focus();
@@ -127,8 +137,7 @@ Template.cabinet.events({
 					$('.popup').hide();
 				}
 			});
-		}
-		
+		}	
 	},
 
 	'click #create_user': function(event) {
@@ -171,11 +180,8 @@ Template.cabinet.events({
     		$('.popup').hide();
     		$('.popup_menu').css('color', 'white');
     	}	
-	},
+	}
 })
-
-
-
 
 
 Template.notifications.events({
@@ -186,13 +192,12 @@ Template.notifications.events({
 		
 		if ( $(elem).hasClass('notification_item') ) {
 
-			var notification = Notifications.findOne({'_id': elem.id })
-			
-			var html = Blaze.toHTMLWithData(
+			var notification = Notifications.findOne({'_id': elem.id }),
+				html = Blaze.toHTMLWithData(
 							Template.notificationWindow, 
 							{notification}
 						);
-			
+
 			$(elem).closest('li').append(html)			
 		}
 	},
@@ -201,26 +206,22 @@ Template.notifications.events({
 		event.preventDefault();
 		
 		var elem = event.target,
-			notification = Notifications.findOne({'_id': $(event.currentTarget).attr('name') })
+			notification = Notifications.findOne({ '_id': $(event.currentTarget).attr('name') }),
+			group = new Group(notification.groupId);
 		
 		if ( elem.id === 'confirm_participation') {
-	
-			Meteor.call('addEvent', notification.groupId, Meteor.userId(), 'confirmed')
+			group.addPizzaDay('confirmed');
 			
 			$('#parent_popup').remove();
 			
 			Router.go('/groups/' + notification.group + '?navigateItem=pizzaDay');
-			Notifications.update({'_id': notification._id}, 
-						{$set: {'read': true}	});
+			group.readNotification(notification._id);
 		}
 		if ( elem.id === 'cancel_participation') {
-
-			Meteor.call('addEvent', notification.groupId, Meteor.userId(), 'canceled');
-			
+			group.addPizzaDay('canceled');
+			group.readNotification(notification._id);
 			$('#parent_popup').remove();
-			Notifications.update({'_id': notification._id}, 
-						{$set: {'read': true}	});
+			
 		}
 	}
 })
-

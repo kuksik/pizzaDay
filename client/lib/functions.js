@@ -80,7 +80,6 @@
 		var inputs = this.find('input');
 			valid = true
 
-
 		for (var i=0; i< inputs.length; i++) {
 			var elem = inputs[i];
 			
@@ -91,11 +90,7 @@
 			else if( $(elem).val() && !$(elem).hasClass('valid')  ){
 				valid = false;
 			}
-
 		}
-
-		
 		return valid;
-
 	}
 }( jQuery ));

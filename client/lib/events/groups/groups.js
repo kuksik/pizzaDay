@@ -1,4 +1,5 @@
 Template.groups.events({
+
 	'click .button_popup_window':function(event) {
 		$(event.target).popupWindow();
 	}
@@ -6,7 +7,6 @@ Template.groups.events({
 
 
 Template.groupsList.events({
-
 
 	'click #groups_list a': function(event) {
 		
@@ -19,12 +19,12 @@ Template.groupsList.events({
 	'click #groups_list': function(event) {
 		
 		var elem = event.target,
-			groupId = $(elem).closest('.list_item').attr('id');
+			groupId = $(elem).closest('.list_item').attr('id'),
+			group = new Group(groupId);
 
 		if ( $(elem).hasClass('del_group') ) {	
 			event.preventDefault();
-			Meteor.call('removeGroup', groupId);
-			
+			group.removeGroup();
 		}
 
 		else if ( $(elem).hasClass('edit_group') ) {
@@ -55,12 +55,8 @@ Template.groupsList.events({
 
 			$('#edit_span').text(group._id)
 			$('#title').focus();
-			
-			
 		};
-
 	}
-
 })
 
 
@@ -83,7 +79,6 @@ Template.newGroup.events({
 		}
 	},
 
-
 	'click #add_group': function(event) {
 		event.preventDefault();
 
@@ -91,17 +86,14 @@ Template.newGroup.events({
 			logo = $('#logo').val() || 'http://www.rippleeffectlegacies.org/wp-content/uploads/2014/05/Group-Icon.png',
 			form = (event.target).closest('form');
 		
-		if ( !$(form).checkRequiredFields(1) ){
+		if ( !$(form).checkRequiredFields() ){
 			return
 		}
 		else if ( Groups.findOne( {'title': title}) ){
-			
 			$('#title').showError('Ououou... choose another title');
 			return
 		} 
-		else {
-			
-				
+		else {	
 			var group = new Group();
 			
 			group.addGroup(title, logo);
@@ -110,7 +102,6 @@ Template.newGroup.events({
 			Router.go('groupInfo', {title: title}, {query: 'navigateItem=members'})
 		}
 	},
-
 
 	'click #edit_group': function(event) {
 		event.preventDefault();
@@ -121,11 +112,10 @@ Template.newGroup.events({
 			checkGroup = Groups.findOne({'title': title}, {'fields': {'title':1}}),
 			form = (event.target).closest('form');	
 		
-		
-
-		if ( !$(form).checkRequiredFields(1) ) {
+		if ( !$(form).checkRequiredFields() ) {
 			return
-		} else if ( !!checkGroup  && checkGroup._id !== id){
+		} 
+		else if ( !!checkGroup  && checkGroup._id !== groupId){
 			$('#title').showError('Ououou... choose another title');
 			return
 		} 
@@ -133,9 +123,9 @@ Template.newGroup.events({
 			$('#cancel').trigger('click')
 			$('.del_group').show();
 
-			var group = new Group();
-			
-			group.editGroup(groupId, title, logo);
+			var group = new Group(groupId);
+						
+			group.editGroup(title, logo);
 		}
 	},
 
@@ -151,16 +141,4 @@ Template.newGroup.events({
 
 		$('.del_group').show();
 	},
-})
-
-
-
-
-
-
-
-
-
-
-
-
+});
