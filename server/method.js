@@ -3,8 +3,19 @@ Meteor.startup( function() {
 });
 Meteor.methods({
 
-	'checkNewUserEmail': function(email) {
-    	return !!Accounts.findUserByEmail(email)
+	'chekcNewUserInfo': function(data) {
+		var res = { 'valid': true };
+		
+		if ( !!Accounts.findUserByEmail(data.email) ) {
+			res.email = !!Accounts.findUserByEmail(data.email);
+			res.valid = false;
+		};
+		if ( !!Users.findOne({'profile.name': data.name}) ) {
+			res.name = !!Users.findOne({'profile.name': data.name});
+			res.valid = false;
+		}
+
+		return res;
 	},
 
 	'removeNotifications': function(groupId) {
@@ -52,11 +63,10 @@ Meteor.methods({
 	},
 
 	'sendEmail': function(userId, html) {
-            
 	    var user = Users.findOne(
-	    			{ '_id': userId },
-	    			{ 'fields': { 'services.google.email': 1, 'emails.address': 1 } }
-	    		);
+	    				{ '_id': userId },
+	    				{ 'fields': { 'services.google.email': 1, 'emails.address': 1 } }
+	    			);
 
 	    if (user.services.google) {  
 	     	var email = user.services.google.email;

@@ -35,7 +35,7 @@ Template.groupInfo.events({
 		
 		Router.go('/groups/' + this.title + '?navigateItem=pizzaDay')
 		$('.navigate_item').css('color', 'black').removeClass('selected_green');
-		Meteor.setTimeout(function() { $('#navigate_items > a#pizzaDay').addClass('selected_green')}, 150)
+		Meteor.setTimeout(function() { $('#navigate_items > a#pizzaDay').addClass('selected_green')}, 200)
 	},
 
 
@@ -46,20 +46,6 @@ Template.groupInfo.events({
 
 
 Template.members.events({
-
-	'click #members_list': function(event) {
-		event.preventDefault();
-		var elem = event.target;
-
-		if ( $(elem).hasClass('del_user') ) {
-			
-			var memberId = $(elem).attr('id'),
-				group = new Group(this._id);
-
-			group.deleteMember(memberId)
-		}
-	},
-
 	'click #users_container': function(event) {
 		event.preventDefault();		
 		var elem = event.target;
@@ -74,6 +60,19 @@ Template.members.events({
 			if(this.pizzaDay && this.pizzaDay.status === 'ordering' && this.pizzaDay.date === (new Date()).toDateString() ) {
 				group.addNotification(userId, this.pizzaDay.creatorName);
 			}	
+		}
+	},
+
+	'click #members_list': function(event) {
+		event.preventDefault();
+		var elem = event.target;
+
+		if ( $(elem).hasClass('del_user') ) {
+			
+			var memberId = $(elem).attr('id'),
+				group = new Group(this._id);
+
+			group.deleteMember(memberId)
 		}
 	}
 })
@@ -233,6 +232,15 @@ Template.pizzaDay.events({
 						{menu} 
 					);
 		$('#pizzaDay_container').append(html)
+	},
+
+	'click #delete_pizzaDay': function(event) {
+		var group = new Group(this._id);
+		
+		group.pizzaDayChangeStatus('delivering')
+		group.removeNotifications();
+			
+		Router.go(document.location.pathname + '?navigateItem=members');								
 	},
 
 	'click .change_status': function(event) {

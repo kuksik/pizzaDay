@@ -159,7 +159,7 @@ body {
 		font-size: 32px;
 		height: 40px;
 		padding: 20px 0px;
-		background: url('http://www.themesltd.com/headers2/pizza_universe.png') no-repeat;
+		background: url('pizza_universe.png') no-repeat;
 		background-size: 100%;	
 		color: white;
 	}
@@ -265,7 +265,7 @@ body {
 					width: 16px;
 					font-size: 15px;
 					top: 4px;
-					right: 15px;
+					right: 12px;
 				}
 
 		#popup_list {
@@ -333,7 +333,7 @@ body {
 
 .list_item {
 		display: block;
-		padding: 20px 0px 20px 0px;
+		padding: 15px 0px 15px 0px;
 		font-size: 22px;
 		border-bottom: 1px solid #d6d6c2;
 	}
@@ -402,9 +402,9 @@ ul#home_list > li {
 		
 		.logo {
 			filter: invert(100%);
-			border-radius: 25px;
-			height: 50px;
-			width: 50px;
+			border-radius: 40px;
+			height: 60px;
+			width: 60px;
 		}
 		span.title {
 			text-transform: uppercase;
@@ -415,6 +415,10 @@ ul#home_list > li {
 		}
 		span.creator {
 			font-size: 12px;
+		}
+		#groups_list > a > span {
+			position: relative;
+			top: 20px;
 		}
 
 	#addGroup_container {
@@ -532,13 +536,13 @@ ul#home_list > li {
 /********MENU***************/
 
 #menu_container {
-	width: 400px;
+	width: 420px;
 }
 	.menu_list_item > span{
 		display: inline-block;
 	}
 	.dish_title{
-		width: 260px;
+		width: 270px;
 		word-break:break-all;
 	}
 	.dish_price{
@@ -559,7 +563,7 @@ ul#home_list > li {
 /********COUPONS***********/
 
 div#coupons_container {
-	width: 200px;
+	width: auto;
 	position:absolute;
 	position: absolute;
 	right: 30px;
@@ -576,10 +580,13 @@ div#coupons_container {
 	width: 200px;
 
 }
-.change_status {
+#pizzaDay_navigate_buttons {
 	position: absolute;
-	left: 200px;
+	right: 30px;
 	top: 30px;
+}
+#show_order_window {
+	margin: 0;
 }
 	
 #order_window {
@@ -597,4 +604,10 @@ table#menu_list tr td:last-child{
 }
 
 
+.access_denied {
+	padding: 30px;	
+}
+.access_denied p {
+	color: #F42E11;
+}
 

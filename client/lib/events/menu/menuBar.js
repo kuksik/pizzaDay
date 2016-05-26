@@ -106,9 +106,9 @@ Template.cabinet.events({
 	'click #login_google': function(event) {
 		Meteor.loginWithGoogle(function(err) {
 			if (err) {
-				console.log(err); 
+				alert(err); 
 				return
-			}
+			};
 			$('.popup_menu').css('color', 'white');
 			$('.popup').hide();
 		});
@@ -141,45 +141,55 @@ Template.cabinet.events({
 	},
 
 	'click #create_user': function(event) {
+		
 		event.preventDefault();
 
 		var form = $(event.target).closest('form');
-
+ 	
+ 		if ( !$(form).checkRequiredFields() ) {
+    		return
+    	};
     	
-    	if ( !$(form).checkRequiredFields() ) {
-    		return
-    	} 
-    	else if ( Users.findOne({'profile.name': $('#reg_name').val().toLowerCase() } ) ){
-    		$('#reg_name').showError('chosee another name');
-    		return
-    	}
-    	else {
-    		Meteor.call('checkNewUserEmail', $('#reg_email').val().toLowerCase(), function(err, res) {
-				if(res) {
-					$('#reg_email').showError('This email is registed');
-				}
-				else {
-					Accounts.createUser({
-		        		'email': $('#reg_email').val(),
-		        		'password': $('#reg_pas').val(),
-		    			'profile': {
-							name: $('#reg_name').val()
+
+    	var data = {
+    		'name': $('#reg_name').val().toLowerCase(),
+    		'email': $('#reg_email').val().toLowerCase()
+    	};
+    	
+    	Meteor.call('chekcNewUserInfo', data, 
+    		function(err, res) {
+    			if( err ) {
+    				alert(err.reason);
+    				return
+    			};
+
+    			if ( res.valid ) {
+    				Accounts.createUser({
+						'email': $('#reg_email').val(),
+			    		'password': $('#reg_pas').val(),
+						'profile': {
+							'name': $('#reg_name').val()
 						},
-		    			function(err) {
-			        		if (err) {			
-				        		alert(err.reason)
-				        	} else {
-				        		$('.popup_menu').css('color', 'white');
-				        		$('.popup').hide();
-			        		}
+						
+						function(err) {
+	    					if (err) {			
+	        					alert(err.reason)
+	        					return
+	        				}
 						} 
-					});
-					
-				}
-			});
-    		$('.popup').hide();
-    		$('.popup_menu').css('color', 'white');
-    	}	
+					});	
+					$('.popup_menu').css('color', 'white');
+	        		$('.popup').hide();	
+    			}
+    			else {
+					if ( res.name ) {
+						$('#reg_name').showError('Chosee another name');
+					};
+					if ( res.email ) {
+						$('#reg_email').showError('This email is registed');
+					};
+				};
+    	});
 	}
 })
 

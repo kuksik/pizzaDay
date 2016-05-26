@@ -1,24 +1,14 @@
-	<template name="groups">
-
+<template name="groups">
 	<div id='groups_container'>		
-	
-
 		{{>groupsList}}
 
 		{{#if currentUser}}
 			{{>newGroup}}
 		{{/if}}
-
-
-
 	</div>
-
-
-
 </template>
 
 <template name = "groupsList">
-	
 		<h2>Groups list</h2>
 		<div id='groups_list' class='list'> 
 			{{#if groups.length }}

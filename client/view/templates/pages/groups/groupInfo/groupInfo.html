@@ -1,4 +1,4 @@
-<template name='groupInfo'> 
+	<template name='groupInfo'> 
 	<div id='group_navigate' class='default'>
 		<div id='navigate_header'>
 			<span style = 'font-size:25px' class='uppercase_text'>{{title}}</span>
@@ -217,7 +217,15 @@
 	<div id='pizzaDay_container'>		
 		<h2>Pizza Day</h2> 
 		{{#if eventCreator}}
-			<a class='new_button change_status' id={{pizzaDay.status}}> change status to "delivering" </a>
+			<span id = 'pizzaDay_navigate_buttons'>
+				
+				<a class='new_button' id='delete_pizzaDay'> Delete pizzaDay event </a>
+				<br>
+				<br>
+				{{#if notOrderingStatus}}
+					<a class='new_button change_status' id={{pizzaDay.status}}> Change status to "delivering" </a>
+				{{/if}}
+			</span>
 		{{/if}}
 		
 		<p> Date: {{pizzaDay.date}}</p>

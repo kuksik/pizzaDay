@@ -1,10 +1,15 @@
 Template.registerHelper('eventCreator', function() {
 	var status = this.pizzaDay.status;
-	if ( Meteor.userId() === this.pizzaDay.creator && 
-									(status !== 'ordering') ) {
+	if ( Meteor.userId() === this.pizzaDay.creator ) {
 		return true;
 	}
-}),
+});
+
+Template.registerHelper('notOrderingStatus', function() {
+	if ( this.pizzaDay.status !== 'ordering' ) {
+		return true;
+	}
+});
 
 Template.registerHelper('author', function() {
 	if (this.founder) {

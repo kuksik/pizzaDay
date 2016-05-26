@@ -1,0 +1,38 @@
+{
+  "format": "web-program-pre1",
+  "manifest": [
+    {
+      "path": "6800a8eaa9f3096e8b60a1b243562ed5a6c7aa86.js",
+      "where": "client",
+      "type": "js",
+      "cacheable": true,
+      "url": "/6800a8eaa9f3096e8b60a1b243562ed5a6c7aa86.js?meteor_js_resource=true",
+      "size": 587392,
+      "hash": "6800a8eaa9f3096e8b60a1b243562ed5a6c7aa86"
+    },
+    {
+      "path": "e20b57e9aa8e92f54bae59e4a267feecd4bfc49d.css",
+      "where": "client",
+      "type": "css",
+      "cacheable": true,
+      "url": "/e20b57e9aa8e92f54bae59e4a267feecd4bfc49d.css?meteor_css_resource=true",
+      "size": 14053,
+      "hash": "e20b57e9aa8e92f54bae59e4a267feecd4bfc49d"
+    },
+    {
+      "path": "app/pizza_universe.png",
+      "where": "client",
+      "type": "asset",
+      "cacheable": false,
+      "url": "/pizza_universe.png",
+      "size": 104220,
+      "hash": "c4ad054343ed8674659b146db9b3d55d1f9604fe"
+    },
+    {
+      "path": "head.html",
+      "where": "internal",
+      "type": "head",
+      "hash": "6a254ad95dee5347776c62db35e005e278c26655"
+    }
+  ]
+}

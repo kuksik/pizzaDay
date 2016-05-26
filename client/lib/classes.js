@@ -172,10 +172,9 @@ Group = class Group {
 		);
 	};
 
-	removeGroup() {
+	removeGroup(title) {
 		Meteor.call('removeGroup', this.groupId);
 	};
-
 
 
 	addMember(userId, userName) {
@@ -271,7 +270,7 @@ Group = class Group {
 		);
 	};
 
-	deleteCoupon(groupId, couponId) {
+	deleteCoupon(couponId) {
 		var data = {}
 			data['coupons.'+ couponId ] =  1;
 			
@@ -375,7 +374,7 @@ Group = class Group {
 		)
 	};
 
-	readNotifiction(notificationId) {
+	readNotification(notificationId) {
 		Notifications.update(
 			{'_id': notificationId}, 
 			{ $set: { 'read': true } }

@@ -7,15 +7,6 @@ Template.groups.events({
 
 
 Template.groupsList.events({
-
-	'click #groups_list a': function(event) {
-		
-		if ( !Meteor.user() ) {
-			event.preventDefault();
-			alert('This content is available only to registered users')
-		}		
-	},
-
 	'click #groups_list': function(event) {
 		
 		var elem = event.target,
@@ -90,7 +81,7 @@ Template.newGroup.events({
 			return
 		}
 		else if ( Groups.findOne( {'title': title}) ){
-			$('#title').showError('Ououou... choose another title');
+			$('#title').showError('Choose another title');
 			return
 		} 
 		else {	
